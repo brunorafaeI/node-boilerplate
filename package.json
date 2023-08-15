@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/server.ts",
+  "engines": {
+    "node": ">=18.16.0"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node -r tsconfig-paths/register dist/server.js",
