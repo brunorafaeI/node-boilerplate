@@ -1,1 +1,1 @@
-export * from './String'
+export { StringUtil } from './string'

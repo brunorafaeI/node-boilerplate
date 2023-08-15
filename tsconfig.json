@@ -11,7 +11,8 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["vitest/globals"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]
