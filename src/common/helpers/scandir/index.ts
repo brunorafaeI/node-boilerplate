@@ -5,7 +5,7 @@ export async function* scandir(
   directoryPath: string
 ): AsyncGenerator<string, void, void> {
   try {
-    const files = await readdir(directoryPath, { withFileTypes: true }) || []
+    const files = (await readdir(directoryPath, { withFileTypes: true })) || []
 
     for (const file of files) {
       const fullPath = path.resolve(directoryPath, file.name)
@@ -16,7 +16,6 @@ export async function* scandir(
         yield fullPath
       }
     }
-    
   } catch (error) {
     console.error(error)
   }

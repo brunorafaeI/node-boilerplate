@@ -1,11 +1,5 @@
 import path from 'node:path'
-import {
-  readdir,
-  rmdir,
-  symlink,
-  unlink,
-  writeFile,
-} from 'node:fs/promises'
+import { readdir, rmdir, symlink, unlink, writeFile } from 'node:fs/promises'
 import { Dirent } from 'node:fs'
 import os from 'node:os'
 
@@ -35,12 +29,14 @@ describe('scandir', () => {
     const expectedFiles = [
       {
         name: directoryPath + '/file1.txt',
-        isFile: () => true,
         isDirectory: () => false,
       },
       {
         name: directoryPath + '/file2.txt',
-        isFile: () => true,
+        isDirectory: () => false,
+      },
+      {
+        name: directoryPath + '/subdirectory/file3.txt',
         isDirectory: () => false,
       },
     ]
@@ -80,5 +76,25 @@ describe('scandir', () => {
     await unlink(symlinkPath)
     await unlink(tmpFile)
     await rmdir(directoryPath)
+  })
+
+  // Tests that scandir handles errors thrown by readdir
+  it('should catch and log errors thrown by readdir', async () => {
+    const directoryPath = path.resolve('test-directory')
+    const expectedError = new Error('readdir error')
+
+    vi.mocked(readdir).mockRejectedValue(expectedError)
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(vi.fn())
+
+    const files = []
+    for await (const file of scandir(directoryPath)) {
+      files.push(file)
+    }
+
+    expect(files).toEqual([])
+    expect(consoleSpy).toHaveBeenCalledWith(expectedError)
+
+    consoleSpy.mockRestore()
   })
 })
