@@ -37,7 +37,7 @@ describe('scandir', () => {
       },
       {
         name: directoryPath + '/subdirectory/file3.txt',
-        isDirectory: () => false,
+        isDirectory: () => true,
       },
     ]
 
@@ -45,6 +45,13 @@ describe('scandir', () => {
 
     const files = []
     for await (const file of scandir(directoryPath)) {
+      vi.mocked(readdir).mockResolvedValue([
+        {
+          name: directoryPath + '/subdirectory/file3.txt',
+          isDirectory: () => false,
+        },
+      ] as Dirent[])
+
       files.push(file)
     }
 
