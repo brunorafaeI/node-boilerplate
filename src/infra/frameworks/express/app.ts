@@ -12,7 +12,7 @@ app.use(cors())
 app.use(express.json())
 app.use(AppError.handler)
 
-app.use('/api/v1', routes, (_, res) => {
+app.use('/api', routes, (_, res) => {
   res.status(200).json({ message: 'Welcome to my Api REST' })
 })
 

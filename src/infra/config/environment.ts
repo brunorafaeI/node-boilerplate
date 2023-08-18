@@ -6,7 +6,6 @@ import { getEnv } from '@/common/libs/dotenv'
 
 export const APP_ENV = getEnv('NODE_ENV', 'development')
 const PROJECT_DIR = KERNEL.project_dir
-
 export const checkEnvFile = (envPath: string) => {
   if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath })

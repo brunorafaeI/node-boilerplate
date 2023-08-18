@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express'
-
 export class AppError extends Error {
 
   constructor(
@@ -8,7 +7,6 @@ export class AppError extends Error {
   ) {
     super()
   }
-
   static handler(
     err: any,
     req: Request,

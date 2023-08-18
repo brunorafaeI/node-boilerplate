@@ -1,3 +1,5 @@
+import 'reflect-metadata'
+
 export enum RouteMethod {
   GET = 'get',
   POST = 'post',
@@ -11,7 +13,7 @@ export interface RouteDefinition {
   handler: (req: Request, res: Response) => void | Promise<void>
 }
 
-const ROUTE_METADATA_KEY = Symbol('route')
+export const ROUTE_METADATA_KEY = Symbol('route')
 
 /**
  * Generates a route decorator function that adds routes to the metadata of a class.
@@ -20,13 +22,16 @@ const ROUTE_METADATA_KEY = Symbol('route')
  * @param {RouteMethod} method - The HTTP method of the route.
  * @return {void}
  */
-export const Route = <T>(path: string, method: RouteMethod) => {
-  return (target: T, _: string, descriptor: PropertyDescriptor) => {
+export const Route = (path: string, method: RouteMethod) => {
+  return (target: any, _: string, descriptor: PropertyDescriptor) => {
     try {
       const routes =
         Reflect.getMetadata(ROUTE_METADATA_KEY, target.constructor) || []
 
-      const newRoutes = { ...routes, [path]: { method, handler: descriptor.value } }
+      const newRoutes = {
+        ...routes,
+        [path]: { method, handler: descriptor.value },
+      }
       Reflect.defineMetadata(ROUTE_METADATA_KEY, newRoutes, target.constructor)
     } catch (error) {
       console.error(`Error in Route function: ${error}`)
@@ -42,13 +47,13 @@ export const Put = (path: string) => Route(path, RouteMethod.PUT)
 
 export const Controller = (routePrefix: string) => {
   return (constructor: any) => {
-    const routes = [
-      ...new Set<RouteDefinition>(Reflect.getMetadata('route', constructor)),
-    ]
+    const routes = Reflect.getMetadata(ROUTE_METADATA_KEY, constructor) || {}
 
-    routes.map(
-      (route: RouteDefinition) => (route.path = routePrefix + route.path)
-    )
-    Reflect.defineMetadata('route', routes, constructor)
+    const newRoutes = {}
+    for (const [key, value] of Object.entries(routes)) {
+      newRoutes[routePrefix + key] = value
+    }
+
+    Reflect.defineMetadata(ROUTE_METADATA_KEY, newRoutes, constructor)
   }
 }

@@ -1,3 +1,5 @@
+import '@/infra/config/environment'
+
 import { getEnv } from '@/common/libs/dotenv'
 import app from '@/infra/frameworks/express/app'
 

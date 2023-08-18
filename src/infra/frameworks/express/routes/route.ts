@@ -1,22 +1,24 @@
 import path from 'node:path'
 import { Router } from 'express'
 
-import { RouteDefinition } from '@/common/decorators/route'
+import { ROUTE_METADATA_KEY, RouteDefinition } from '@/common/decorators/route'
 import { KERNEL } from '@/infra/config/kernel'
 import { scandir } from '@/common/helpers/scandir'
 
 export default abstract class AppRouter {
   public static _route: Router = Router()
-
   static async bootstrap(): Promise<void> {
-    const controllersPath = scandir(
-      path.resolve(KERNEL.project_dir, 'src', 'app', 'modules')
+    const controllersPath = path.resolve(
+      KERNEL.project_dir,
+      'src',
+      'app',
+      'modules'
     )
 
-    for await (const file of controllersPath) {
+    for await (const file of scandir(controllersPath)) {
       if (file.includes('controller')) {
         try {
-          const controller = require(path.resolve(file))
+          const controller = require(file)
 
           if (controller) {
             if ('default' in controller) {
@@ -33,16 +35,13 @@ export default abstract class AppRouter {
       }
     }
   }
-
   static register(controller: any): void {
-    if (Reflect.hasMetadata('route', controller)) {
-      const routes = [
-        ...new Set<RouteDefinition>(Reflect.getMetadata('route', controller)),
-      ]
+    if (Reflect.hasMetadata(ROUTE_METADATA_KEY, controller)) {
+      const routes = Reflect.getMetadata(ROUTE_METADATA_KEY, controller)
 
-      routes.forEach(({ method, path, handler }) => {
-        ;(AppRouter._route as any)[method](path, handler)
-      })
+      for (const [path, route] of Object.entries<RouteDefinition>(routes)) {
+        ;(AppRouter._route as any)[route.method](path, route.handler)
+      }
     }
   }
 }
